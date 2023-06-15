@@ -1,53 +1,38 @@
-*Concepts you may want to Google beforehand: interrupts, CPU
-registers*
+**Objetivo: hacer que nuestro sector de arranque previamente silencioso imprima algún texto**
 
-**Goal: Make our previously silent boot sector print some text**
+Mejoraremos un poco nuestro sector de arranque de bucle infinito e imprimiremos algo en la pantalla. Levantaremos una interrupción para esto.
 
-We will improve a bit on our infinite-loop boot sector and print
-something on the screen. We will raise an interrupt for this.
+En este ejemplo, vamos a escribir cada carácter de la palabra "Hola" en el registro `al` (parte inferior de `ax`), los bytes `0x0e` en `ah` (la parte superior de `ax`) y aumentar la interrupción `0x10`, que es una interrupción general para los servicios de video.
 
-On this example we are going to write each character of the "Hello"
-word into the register `al` (lower part of `ax`), the bytes `0x0e`
-into `ah` (the higher part of `ax`) and raise interrupt `0x10` which
-is a general interrupt for video services.
+`0x0e` en `ah` le dice a la interrupción de video que la función real que queremos ejecutar es 'escribir el contenido de `al` en modo tty'.
 
-`0x0e` on `ah` tells the video interrupt that the actual function
-we want to run is to 'write the contents of `al` in tty mode'.
+Estableceremos el modo tty solo una vez, aunque en el mundo real no podemos estar seguros de que los contenidos de `ah` sean constantes. Es posible que algún otro proceso se ejecute en la CPU no se limpie correctamente y deje datos basura en `ah`.
 
-We will set tty mode only once though in the real world we 
-cannot be sure that the contents of `ah` are constant. Some other
-process may run on the CPU while we are sleeping, not clean
-up properly and leave garbage data on `ah`.
+Para este ejemplo, no necesitamos ocuparnos de eso, ya que somos lo único que se ejecuta en la CPU.
 
-For this example we don't need to take care of that since we are
-the only thing running on the CPU.
-
-Our new boot sector looks like this:
+Nuestro nuevo sector de arranque:
 ```nasm
-mov ah, 0x0e ; tty mode
+mov ah, 0x0e ; modo tty
 mov al, 'H'
 int 0x10
 mov al, 'e'
 int 0x10
 mov al, 'l'
 int 0x10
-int 0x10 ; 'l' is still on al, remember?
+int 0x10 ; 'l' seguirá en al
 mov al, 'o'
 int 0x10
 
-jmp $ ; jump to current address = infinite loop
+jmp $ ; saltar a la dirección actual = bucle infinito
 
-; padding and magic number
 times 510 - ($-$$) db 0
 dw 0xaa55 
 ```
 
-You can examine the binary data with `xxd file.bin`
-
-Anyway, you know the drill:
+Podemos examinar los datos binarios con: `xxd file.bin`
 
 `nasm -fbin boot_sect_hello.asm -o boot_sect_hello.bin`
 
 `qemu boot_sect_hello.bin`
 
-Your boot sector will say 'Hello' and hang on an infinite loop
+Su sector de arranque dirá 'Hola' y se colgará en un bucle infinito
