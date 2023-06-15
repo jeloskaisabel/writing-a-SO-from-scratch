@@ -18,9 +18,9 @@ the_secret:
 
 Luego intentaremos acceder a `the_secret` de muchas maneras diferentes:
 
-1. `mov al, el_secreto`
-2. `mov al, [el_secreto]`
-3. `mov al, el_secreto + 0x7C00`
+1. `mov al, the_secret`
+2. `mov al, [the_secret]`
+3. `mov al, the_secret + 0x7C00`
 4. `mov al, 2d + 0x7C00`, donde `2d` es la posición real del byte 'X' en el binario
 
 Compilamos y ejecutamos el código. Observamos `1[2¢3X4X`, donde los bytes que siguen a 1 y 2 son aleatorios.
