@@ -1,21 +1,9 @@
-*Concepts you may want to Google beforehand: control structures,
-function calling, strings*
-
-**Goal: Learn how to code basic stuff (loops, functions) with the assembler**
-
-We are close to our definitive boot sector.
-
-In lesson 7 we will start reading from the disk, which is the last step before
-loading a kernel. But first, we will write some code with control structures,
-function calling, and full strings usage. We really need to be comfortable with
-those concepts before jumping to the disk and the kernel.
-
+**Objetivo: Programación en Assembler**
 
 Strings
 -------
 
-Define strings like bytes, but terminate them with a null-byte (yes, like C)
-to be able to determine their end.
+Se definen las cadenas como bytes, pero hay que terminarlas con un byte nulo para poder determinar su final.
 
 ```nasm
 mystring:
