@@ -16,7 +16,7 @@ the_secret:
     db "X"
 ```
 
-Luego intentaremos acceder a `the_secret` de muchas maneras diferentes:
+Luego intentaremos acceder a `the_secret` de diferentes formas:
 
 1. `mov al, the_secret`
 2. `mov al, [the_secret]`
