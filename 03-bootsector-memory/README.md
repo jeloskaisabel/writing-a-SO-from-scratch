@@ -1,63 +1,43 @@
-*Concepts you may want to Google beforehand: memory offsets, pointers*
+**Organización de la memoria de la computadora**
 
-**Goal: Learn how the computer memory is organized**
-
-Please open page 14 [of this document](
+En la página 14 [del documento](
 http://www.cs.bham.ac.uk/~exr/lectures/opsys/10_11/lectures/os-dev.pdf)<sup>1</sup>
-and look at the figure with the memory layout.
+podemos observar el diseño de la memoria.
+Ahora veremos dónde se almacena el sector de arranque
 
-The only goal of this lesson is to learn where the boot sector is stored
+Sabemos que el BIOS lo ubica en `0x7C00`, sin embargo debemos hacer las siguientes consideraciones las cuales se ven a través de ejemplos.
 
-I could just bluntly tell you that the BIOS places it at `0x7C00` and
-get it done with, but an example with wrong solutions will make things clearer.
-
-We want to print an X on screen. We will try 4 different strategies
-and see which ones work and why.
-
+Imprimiremos una X en pantalla. Probaremos 4 estrategias diferentes y veremos cuáles funcionan y por qué.
 **Open the file `boot_sect_memory.asm`**
 
-First, we will define the X as data, with a label:
+Primero, definiremos la X como dato, con una etiqueta:
 ```nasm
 the_secret:
     db "X"
 ```
 
-Then we will try to access `the_secret` in many different ways:
+Luego intentaremos acceder a `the_secret` de muchas maneras diferentes:
 
-1. `mov al, the_secret`
-2. `mov al, [the_secret]`
-3. `mov al, the_secret + 0x7C00`
-4. `mov al, 2d + 0x7C00`, where `2d` is the actual position of the 'X' byte in the binary
+1. `mov al, el_secreto`
+2. `mov al, [el_secreto]`
+3. `mov al, el_secreto + 0x7C00`
+4. `mov al, 2d + 0x7C00`, donde `2d` es la posición real del byte 'X' en el binario
 
-Take a look at the code and read the comments.
+Compilamos y ejecutamos el código. Observamos `1[2¢3X4X`, donde los bytes que siguen a 1 y 2 son aleatorios.
 
-Compile and run the code. You should see a string similar to `1[2¢3X4X`, where
-the bytes following 1 and 2 are just random garbage.
-
-If you add or remove instructions, remember to compute the new offset of the X
-by counting the bytes, and replace `0x2d` with the new one.
-
-Please don't continue onto the next section unless you have 100% understood
-the boot sector offset and memory addressing.
+Si agregamos o elimina instrucciones, hay que calcular el nuevo desplazamiento de la X contando los bytes y reemplazar `0x2d` con el nuevo.
 
 
-The global offset
+El desplazamiento global
 -----------------
 
-Now, since offsetting `0x7c00` everywhere is very inconvenient, assemblers let
-us define a "global offset" for every memory location, with the `org` command:
+Ahora, dado que compensar `0x7c00` en todas partes es muy inconveniente, los ensambladores nos permiten definir un "desplazamiento global" para cada ubicación de memoria, con el comando `org`:
 
 ```nasm
 [org 0x7c00]
 ```
 
-Go ahead and **open `boot_sect_memory_org.asm`** and you will see the canonical
-way to print data with the boot sector, which is now attempt 2. Compile the code
-and run it, and you will see how the `org` command affects each previous solution.
+Abriendo **open `boot_sect_memory_org.asm`** observaremos la forma canónica de imprimir datos con el sector de arranque, que ahora es intento 2. Compilando el código y ejecútandolo, y observamos como afecta el comando `org` a cada solución anterior.
 
-Read the comments for a full explanation of the changes with and without `org`
+En los comentarios del archivo tenemos una explicación completa de los cambios con y sin `org`
 
------
-
-[1] This whole tutorial is heavily inspired on that document. Please read the
-root-level README for more information on that.
