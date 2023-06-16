@@ -1,25 +1,9 @@
-*Concepts you may want to Google beforehand: segmentation*
+**Objetivo: Direccionar la memoria con segmentación en modo real de 16 bits**
 
-**Goal: learn how to address memory with 16-bit real mode segmentation**
+La segmentación significa que puede especificar una compensación para todos los datos a los que hace referencia.
 
-If you are comfortable with segmentation, skip this lesson.
+Esto se hace usando registros especiales: `cs`, `ds`, `ss` y `es`, para Código, Datos, Pila y Extra (es decir, definido por el usuario)
 
-We did segmentation
-with `[org]` on lesson 3. Segmentation means that you can specify
-an offset to all the data you refer to.
+Son *implícitamente* utilizados por la CPU, por lo que una vez que establezca algún valor para, por ejemplo para, `ds`, entonces todo su acceso a la memoria se compensará con `ds`. 
 
-This is done by using special registers: `cs`, `ds`, `ss` and `es`, for
-Code, Data, Stack and Extra (i.e. user-defined)
-
-Beware: they are *implicitly* used by the CPU, so once you set some
-value for, say, `ds`, then all your memory access will be offset by `ds`.
-[Read more here](http://wiki.osdev.org/Segmentation)
-
-Furthermore, to compute the real address we don't just join the two
-addresses, but we *overlap* them: `segment << 4 + address`. For example,
-if `ds` is `0x4d`, then `[0x20]` actually refers to `0x4d0 + 0x20 = 0x4f0`
-
-Enough theory. Have a look at the code and play with it a bit.
-
-Hint: We cannot `mov` literals to those registers, we have to
-use a general purpose register before.
+Además, para calcular la dirección real, no solo unimos las dos direcciones, sino que las *superponemos*: `segmento << 4 + dirección`. Por ejemplo, si `ds` es `0x4d`, entonces `[0x20]` en realidad se refiere a `0x4d0 + 0x20 = 0x4f0`
