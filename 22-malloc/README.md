@@ -1,24 +1,13 @@
-*Concepts you may want to Google beforehand: malloc*
+**Objetivo: implementar un asignador de memoria**
 
-**Goal: Implement a memory allocator**
+Agregaremos un asignador de memoria del kernel a `libc/mem.c`. Se implementa como un simple puntero a la memoria libre, que sigue creciendo.
 
-We will add a kernel memory allocator to `libc/mem.c`. It is 
-implemented as a simple pointer to free memory, which keeps
-growing.
+La función `kmalloc()` se puede usar para solicitar una página alineada, y también devolverá la dirección física real para su uso posterior.
 
-The `kmalloc()` function can be used to request an aligned page,
-and it will also return the real, physical address, for later use.
+Cambiaremos `kernel.c` dejando todo el código "shell" allí. Probemos el nuevo `kmalloc()` y comprobemos que nuestra primera página comienza en 0x10000 (como está codificado en `mem.c` ) y `kmalloc()` posteriores producen una nueva dirección que está alineada a 4096 bytes o 0x1000 de la anterior.
 
-We'll change the `kernel.c` leaving all the "shell" code there,
-Let's just try out the new `kmalloc()`, and check out that
-our first page starts at 0x10000 (as hardcoded on `mem.c`) and
-subsequent `kmalloc()`'s produce a new address which is
-aligned 4096 bytes or 0x1000 from the previous one.
+Tenga en cuenta que agregamos un nuevo `strings.c:hex_to_ascii()` para una mejor impresión de números hexadecimales.
 
-Note that we added a new `strings.c:hex_to_ascii()` for
-nicer printing of hex numbers.
+Otra modificación es cambiar el nombre de `types.c` a `type.c` para mantener la coherencia del lenguaje.
 
-Another cosmetic modification is to rename `types.c` to 
-`type.c` for language consistency.
-
-The rest of the files are unchanged from last lesson.
+El resto de los archivos no han cambiado.
