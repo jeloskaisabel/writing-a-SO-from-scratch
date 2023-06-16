@@ -1,31 +1,9 @@
-*Concepts you may want to Google beforehand: GDT*
+**Objetivo: programar el GDT**
 
-**Goal: program the GDT**
+En el modo de 32 bits, la segmentación funciona de manera diferente. Ahora, el desplazamiento se convierte en un índice de un descriptor de segmento (SD) en la GDT. Este descriptor define la dirección base (32 bits), el tamaño (20 bits) y algunos indicadores, como solo lectura, permisos, etc. Para agregar confusión, las estructuras de datos están divididas, así que en el archivo base podemos observar la figura en la página 34.
 
-Remember segmentation from lesson 6? The offset was left shifted
-to address an extra level of indirection.
+La forma más sencilla de programar la GDT es definir dos segmentos, uno para código y otro para datos. Estos pueden superponerse, lo que significa que no hay protección de memoria, pero es lo suficientemente bueno para arrancar, se solucionará más tarde con un lenguaje superior.
 
-In 32-bit mode, segmentation works differently. Now, the offset becomes an
-index to a segment descriptor (SD) in the GDT. This descriptor defines
-the base address (32 bits), the size (20 bits) and some flags, like
-readonly, permissions, etc. To add confusion, the data structures are split,
-so open the os-dev.pdf file and check out the figure on page 34 or the 
-Wikipedia page for the GDT.
+La primera entrada de la GDT debe ser `0x00` para asegurarse de que el programador no cometió ningún error al administrar las direcciones.
 
-The easiest way to program the GDT is to define two segments, one for code
-and another for data. These can overlap which means there is no memory protection,
-but it's good enough to boot, we'll fix this later with a higher language.
-
-As a curiosity, the first GDT entry must be `0x00` to make sure that the
-programmer didn't make any mistakes managing addresses.
-
-Furthermore, the CPU can't directly load the GDT address, but it requires
-a meta structure called the "GDT descriptor" with the size (16b) and address
-(32b) of our actual GDT. It is loaded with the `lgdt` operation.
-
-Let's directly jump to the GDT code in assembly. Again, to understand
-all the segment flags, refer to the os-dev.pdf document. The theory for
-this lesson is quite complex.
-
-In the next lesson we will make the switch to 32-bit protected mode
-and test our code from these lessons.
+Además, la CPU no puede cargar directamente la dirección GDT, pero requiere una metaestructura llamada "descriptor GDT" con el tamaño (16b) y la dirección (32b) de nuestra GDT real. Se carga con la operación `lgdt`.
