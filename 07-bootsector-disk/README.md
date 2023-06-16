@@ -1,63 +1,33 @@
-*Concepts you may want to Google beforehand: hard disk, cylinder, head, sector, 
-carry bit*
+**Objetivo: Permitir que el sector de arranque cargue datos desde el disco para arrancar el kernel**
 
-**Goal: Let the bootsector load data from disk in order to boot the kernel**
+Nuestro sistema operativo no cabe dentro del sector de arranque de 512 bytes, por lo que necesitamos leer datos de un disco para ejecutar el kernel.
 
-Our OS won't fit inside the bootsector 512 bytes, so we need to read data from
-a disk in order to run the kernel.
+Ahora llamamos a algunas rutinas del BIOS, como lo hicimos para imprimir caracteres en la pantalla.
+Para hacerlo, establecemos `al` en `0x02` (y otros registros con el cilindro, cabeza y sector requeridos) y elevamos `int 0x13`
 
-Thankfully, we don't have to deal with turning spinning platters on and off,
-we can just call some BIOS routines, like we did to print characters on the screen.
-To do so, we set `al` to `0x02` (and other registers with the required cylinder, head
-and sector) and raise `int 0x13`
-
-You can access [a detailed int 13h guide here](http://stanislavs.org/helppc/int_13-2.html)
-
-On this lesson we will use for the first time the *carry bit*, which is an extra bit
-present on each register which stores when an operation has overflowed its current
-capacity:
+Ahora usaremos el *carry bit*, que es un bit extra presente en cada registro que almacena cuando una operación ha desbordado su actual
+capacidad:
 
 ```nasm
 mov ax, 0xFFFF
-add ax, 1 ; ax = 0x0000 and carry = 1
+add ax, 1 ; ax = 0x0000 y carry = 1
 ```
 
-The carry isn't accessed directly but used as a control structure by other operators,
-like `jc` (jump if the carry bit is set)
+No se accede directamente al acarreo, pero otros operadores lo utilizan como estructura de control, como `jc` (saltar si el bit de acarreo está configurado)
 
-The BIOS also sets `al` to the number of sectors read, so always compare it
-to the expected number.
+El BIOS también establece `al` en el número de sectores leídos, así que siempre compárelo con el número esperado.
 
 
-Code
+Código
 ----
 
-Open and examine `boot_sect_disk.asm` for the complete routine that
-reads from disk.
+En `boot_sect_disk.asm` se ve la rutina completa que lee desde el disco.
 
-`boot_sect_main.asm` prepares the parameters for disk read and calls `disk_load`.
-Notice how we write some extra data which does not actually belong to the boot
-sector, since it is outside the 512 bits mark.
+`boot_sect_main.asm` prepara los parámetros para la lectura del disco y llama a `disk_load`.
+Nótese que algunos datos adicionales que en realidad no pertenecen al sector de arranque, ya que están fuera de la marca de 512 bits.
 
-The boot sector is actually sector 1 (the first one, sectors start at 1)
-of cylinder 0 of head 0 of hdd 0.
+El sector de arranque es en realidad el sector 1 (el primero, los sectores comienzan en 1) del cilindro 0 de la cabeza 0 de hdd 0.
 
-Thus, any bytes after byte 512 correspond to sector 2 of cylinder 0 of head 0 of hdd 0
+Por lo tanto, cualquier byte después del byte 512 corresponde al sector 2 del cilindro 0 de la cabeza 0 de hdd 0
 
-The main routine will fill it with sample data and then let the bootsector
-read it.
-
-**Note: if you keep getting errors and your code seems fine, make sure that qemu
-is booting from the right drive and set the drive on `dl` accordingly**
-
-The BIOS sets `dl` to the drive number before calling the bootloader. However,
-I found some problems with qemu when booting from the hdd.
-
-There are two quick options:
-
-1. Try the flag `-fda` for example, `qemu -fda boot_sect_main.bin` which will set `dl`
-as `0x00`, it seems to work fine then.
-2. Explicitly use the flag `-boot`, e.g. `qemu boot_sect_main.bin -boot c` which 
-automatically sets `dl` as `0x80` and lets the bootloader read data
-
-
+La rutina principal lo llenará con datos de muestra y luego dejará que el sector de arranque
