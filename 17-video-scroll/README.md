@@ -1,26 +1,9 @@
-*Concepts you may want to Google beforehand: scroll*
+**Objetivo: desplazar la pantalla cuando el texto llegue al final**
 
-**Goal: Scroll the screen when the text reaches the bottom**
+En `drivers/screen.c` y tenemos en cuenta que en la parte inferior de `print_char` hay una nueva sección (línea 84) que comprueba si el desplazamiento actual supera el tamaño de la pantalla y desplaza el texto.
 
-For this short lesson, open `drivers/screen.c` and note that at the
-bottom of `print_char` there is a new section (line 84) which checks
-if the current offset is over the screen size and scrolls the text.
+El desplazamiento real es manejado por una nueva función, `memory_copy`. Es una versión más simple del `memcpy` estándar, pero lo nombramos de manera diferente para evitar colisiones de espacios de nombres, al menos por ahora. Abra `kernel/util.c` para ver su implementación.
 
-The actual scrolling is handled by a new function, `memory_copy`. It is
-a simpler version of the standard `memcpy` but we named it differently
-to avoid namespace collisions, at least for now. Open `kernel/util.c` to
-see its implementation.
+Para ayudar a visualizar el desplazamiento, también implementaremos una función para convertir números enteros en texto, `int_to_ascii`. Nuevamente, es una implementación rápida del estándar `itoa`. Los números enteros que tienen dos dígitos o más, se imprimen al revés.
 
-To help visualize scrolling, we will also implement a function to
-convert integers to text, `int_to_ascii`. Again, it is a quick implementation
-of the standard `itoa`. Notice that for integers which have double digits
-or more, they are printed in reverse. This is intended. On future lessons
-we will extend our helper functions, but that is not the point for now.
-
-Finally, open `kernel/kernel.c`. Initially, each line displays its line
-number. You can set a breakpoint on line 14 to confirm this. Then,
-the following `kprint`s force the kernel to scroll down.
-
-This lesson ends the coverage for the os-dev.pdf document. From now on, we'll
-follow [the OSDev wiki](http://wiki.osdev.org/Meaty_Skeleton) and
-other sources and examples. Thanks Prof. Blundell for that great document!
+Finalmente, abrimos `kernel/kernel.c`. Inicialmente, cada línea muestra su número de línea. Puede establecer un punto de interrupción en la línea 14 para confirmar esto. Luego, los siguientes `kprint`s obligan al núcleo a desplazarse hacia abajo.
