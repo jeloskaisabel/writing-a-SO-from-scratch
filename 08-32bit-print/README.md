@@ -1,31 +1,13 @@
-*Concepts you may want to Google beforehand: 32-bit protected mode, VGA, video 
-memory*
+**Objetivo: Imprimir en la pantalla cuando está en modo protegido de 32 bits**
 
-**Goal: Print on the screen when on 32-bit protected mode**
+El modo de 32 bits nos permite usar registros de 32 bits y direccionamiento de memoria, memoria protegida, memoria virtual y otras ventajas, pero perderemos las interrupciones del BIOS y necesitaremos codificar la GDT.
 
-32-bit mode allows us to use 32 bit registers and memory addressing, 
-protected memory, virtual memory and other advantages, but we will lose
-BIOS interrupts and we'll need to code the GDT (more on this later)
+Escribiremos una nueva rutina de cadena de impresión que funciona en modo de 32 bits, donde no tenemos interrupciones de BIOS, manipulando directamente la memoria de video VGA en lugar de llamar a `int 0x10`. La memoria VGA comienza en la dirección `0xb8000` y tiene un modo de texto que es útil para evitar manipular píxeles directos.
 
-In this lesson we will write a new print string routine which works in
-32-bit mode, where we don't have BIOS interrupts, by directly manipulating
-the VGA video memory instead of calling `int 0x10`. The VGA memory starts
-at address `0xb8000` and it has a text mode which is useful to avoid
-manipulating direct pixels.
-
-
-The formula for accessing a specific character on the 80x25 grid is:
+La fórmula para acceder a un carácter específico en la cuadrícula de 80x25 es:
 
 `0xb8000 + 2 * (row * 80 + col)`
 
-That is, every character uses 2 bytes (one for the ASCII, another for 
-color and such), and we see that the structure of the memory concatenates
-rows.
+Es decir, cada caracter usa 2 bytes (uno para el ASCII, otro para el color y tal), y vemos que la estructura de la memoria concatena filas.
 
-Open `32bit-print.asm` to see the code. It will always print the string
-on the top left of the screen, but soon we'll write higher level routines
-to replace it.
-
-Unfortunately we cannot yet call this routine from the bootloader, because
-we still don't know how to write the GDT and enter protected mode. Once
-you have understood the code, jump to the next lesson.
+En `32bit-print.asm` se tiene el código. Siempre imprimirá la cadena en la parte superior izquierda de la pantalla, pero pronto escribiremos rutinas de nivel superior para reemplazarla.
