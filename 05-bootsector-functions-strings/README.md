@@ -10,51 +10,40 @@ mystring:
     db 'Hello, World', 0
 ```
 
-Notice that text surrounded with quotes is converted to ASCII by the assembler,
-while that lone zero will be passed as byte `0x00` (null byte)
+Assembler convierte el texto entre comillas a ASCII, mientras que ese cero solitario se pasará como byte `0x00` (byte nulo)
 
 
-Control structures
+Estructuras de Control
 ------------------
 
-We have already used one: `jmp $` for the infinite loop.
-
-Assembler jumps are defined by the *previous* instruction result. For example:
+Los saltos del ensamblador están definidos por el resultado de la instrucción *anterior*. Por ejemplo:
 
 ```nasm
-cmp ax, 4      ; if ax = 4
-je ax_is_four  ; do something (by jumping to that label)
-jmp else       ; else, do another thing
-jmp endif      ; finally, resume the normal flow
-
+cmp ax, 4      ; si ax = 4
+je ax_is_four  ; salta a ax_is_four
+jmp else       ; sino salta a else
+jmp endif      ; finalmente, reanudar el flujo normal
 ax_is_four:
     .....
     jmp endif
 
 else:
     .....
-    jmp endif  ; not actually necessary but printed here for completeness
-
+    jmp endif  
 endif:
 ```
 
-Think in your head in high level, then convert it to assembler in this fashion.
-
-There are many `jmp` conditions: if equal, if less than, etc. They are pretty 
-intuitive but you can always Google them
-
-
-Calling functions
+Llamando a funciones
 -----------------
 
-As you may suppose, calling a function is just a jump to a label.
+Llamar a una función es solo un salto a una etiqueta.
 
-The tricky part are the parameters. There are two steps to working with parameters:
+Hay dos pasos para trabajar con parámetros:
 
-1. The programmer knows they share a specific register or memory address
-2. Write a bit more code and make function calls generic and without side effects
+1. El programador sabe que comparten un registro específico o dirección de memoria
+2. Escribir un poco más de código y hacer que las llamadas a funciones sean genéricas y sin efectos secundarios.
 
-Step 1 is easy. Let's just agree that we will use `al` (actually, `ax`) for the parameters.
+El paso 1 es fácil. Por ejemplo, establecemos que usaremos `al` (en realidad, `ax`) para los parámetros.
 
 ```nasm
 mov al, 'X'
@@ -65,59 +54,41 @@ endprint:
 
 print:
     mov ah, 0x0e  ; tty code
-    int 0x10      ; I assume that 'al' already has the character
-    jmp endprint  ; this label is also pre-agreed
+    int 0x10      ; Asumimos que 'al' ya tiene el caracter
+    jmp endprint  ; esta etiqueta también está preestablecida
 ```
 
-You can see that this approach will quickly grow into spaghetti code. The current
-`print` function will only return to `endprint`. What if some other function
-wants to call it? We are killing code reusage.
+Facilmente se puede observar que este enfoque se convertirá en código espagueti. La función `print` actual solo volverá a `endprint`. 
 
-The correct solution offers two improvements:
+La solución correcta ofrece dos mejoras:
 
-- We will store the return address so that it may vary
-- We will save the current registers to allow subfunctions to modify them
-  without any side effects
+- Guardaremos la dirección de devolución para que pueda variar
+- Guardaremos los registros actuales para permitir que las subfunciones los modifiquen sin efectos secundarios.
 
-To store the return address, the CPU will help us. Instead of using a couple of
-`jmp` to call subroutines, use `call` and `ret`.
+Para almacenar la dirección de retorno, la CPU nos ayudará. En lugar de usar un par de `jmp` para llamar a las subrutinas, usamos `call` y `ret`.
 
-To save the register data, there is also a special command which uses the stack: `pusha`
-and its brother `popa`, which pushes all registers to the stack automatically and
-recovers them afterwards.
+Para guardar los datos del registro, también hay un comando especial que usa la pila: `pusha` y `popa`, que empuja todos los registros a la pila automáticamente y los recupera después.
 
 
-Including external files
+Incluyendo archivos externos
 ------------------------
 
-I assume you are a programmer and don't need to convince you why this is
-a good idea.
-
-The syntax is
+La sintaxis es
 ```nasm
 %include "file.asm"
 ```
 
 
-Printing hex values
+Impresión de valores hexadecimales
 -------------------
 
-In the next lesson we will start reading from disk, so we need some way
-to make sure that we are reading the correct data. File `boot_sect_print_hex.asm`
-extends `boot_sect_print.asm` to print hex bytes, not just ASCII chars.
+En la próxima lección, comenzaremos a leer desde el disco, por lo que necesitamos alguna forma de asegurarnos de que estamos leyendo los datos correctos. El archivo `boot_sect_print_hex.asm` extiende `boot_sect_print.asm` para imprimir bytes hexadecimales, no solo caracteres ASCII.
 
 
-Code! 
 -----
 
-Let's jump to the code. File `boot_sect_print.asm` is the subroutine which will
-get `%include`d in the main file. It uses a loop to print bytes on screen.
-It also includes a function to print a newline. The familiar `'\n'` is
-actually two bytes, the newline char `0x0A` and a carriage return `0x0D`. Please
-experiment by removing the carriage return char and see its effect.
+El archivo `boot_sect_print.asm` es la subrutina que obtendrá `%include`d en el archivo principal. Utiliza un bucle para imprimir bytes en la pantalla. También incluye una función para imprimir una nueva línea. El familiar `'\n'` es en realidad dos bytes, el carácter de nueva línea `0x0A` y un retorno de carro `0x0D`. 
 
-As stated above, `boot_sect_print_hex.asm` allows for printing of bytes.
+Como se indicó anteriormente, `boot_sect_print_hex.asm` permite la impresión de bytes.
 
-The main file `boot_sect_main.asm` loads a couple strings and bytes,
-calls `print` and `print_hex` and hangs. If you understood
-the previous sections, it's quite straightforward.
+El archivo principal `boot_sect_main.asm` carga un par de cadenas y bytes, llama a `print` y `print_hex` y se cuelga.
