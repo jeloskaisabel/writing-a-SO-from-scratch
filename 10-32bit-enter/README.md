@@ -1,23 +1,15 @@
-*Concepts you may want to Google beforehand: interrupts, pipelining*
+**Objetivo: Ingresar al modo protegido de 32 bits y probar el código desarrollado anteriormente**
 
-**Goal: Enter 32-bit protected mode and test our code from previous lessons**
+Para saltar al modo de 32 bits:
 
-To jump into 32-bit mode:
+1. Deshabilitar interrupciones
+2. Cargar GDT
+3. Establecer un bit en el registro de control de la CPU `cr0`
+4. Vaciar la canalización de la CPU emitiendo un salto lejano cuidadosamente diseñado
+5. Actualizar todos los registros de segmento
+6. Actualizar la pila
+7. Llamada a una etiqueta conocida que contiene el primer código útil en 32 bits
 
-1. Disable interrupts
-2. Load our GDT
-3. Set a bit on the CPU control register `cr0`
-4. Flush the CPU pipeline by issuing a carefully crafted far jump
-5. Update all the segment registers
-6. Update the stack
-7. Call to a well-known label which contains the first useful code in 32 bits
+Encapsularemos este proceso en el archivo `32bit-switch.asm`. 
 
-We will encapsulate this process on the file `32bit-switch.asm`. Open it
-and take a look at the code.
-
-After entering 32-bit mode, we will call `BEGIN_PM` which is the entry point
-for our actual useful code (e.g. kernel code, etc). You can read the code
-at `32bit-main.asm`. Compile and run this last file and you will see the two 
-messages on the screen.
-
-Congratulations! Our next step will be to write a simple kernel
+Después de ingresar al modo de 32 bits, llamaremos a `BEGIN_PM`, que es el punto de entrada para nuestro código útil real (por ejemplo, código del kernel, etc.). Podemos leer el código en `32bit-main.asm`. Compilamos y ejecutamos este último archivo y veremos los dos mensajes en la pantalla.
