@@ -1,61 +1,36 @@
-*Concepts you may want to Google beforehand: VGA character cells, screen offset*
+## Objetivo
 
-**Goal: Write strings on the screen**
+El objetivo de esta sección es lograr la escritura de cadenas de texto en la pantalla. A través de la implementación de código específico, seremos capaces de mostrar información en el monitor. 
 
-Finally, we are going to be able to output text on the screen. This lesson contains
-a bit more code than usual, so let's go step by step.
+## Estructura de archivos
 
-Open `drivers/screen.h` and you'll see that we have defined some constants for the VGA
-card driver and three public functions, one to clear the screen and another couple
-to write strings, the famously named `kprint` for "kernel print"
+El proyecto se compone de los siguientes archivos:
 
-Now open `drivers/screen.c`. It starts with the declaration of private helper functions
-that we will use to aid our `kprint` kernel API.
+- `drivers/screen.h`: Contiene la definición de constantes para el controlador de la tarjeta VGA y tres funciones públicas: una para borrar la pantalla y dos para escribir cadenas de texto. Destaca la función `kprint`, abreviatura de "kernel imprimir".
 
-There are the two I/O port access routines that we learned in the previous lesson,
-`get` and `set_cursor_offset()`.
+- `drivers/screen.c`: Este archivo inicia con la declaración de funciones auxiliares privadas que se utilizan para asistir a la API del kernel en la impresión de texto. Entre estas funciones se encuentran `get` y `set_cursor_offset()`, rutinas de acceso al puerto de E/S aprendidas en lecciones anteriores. Además, se encuentra la rutina `print_char()`, encargada de manipular directamente la memoria de video para imprimir caracteres en la pantalla. Por último, se incluyen tres pequeñas funciones auxiliares para transformar filas y columnas en compensaciones y viceversa.
 
-Then there is the routine that directly manipulates the video memory, `print_char()`
+## Funciones principales
 
-Finally, there are three small helper functions to transform rows and columns into offsets
-and vice versa.
+### Función `kprint_at`
 
+La función `kprint_at` se utiliza para imprimir una cadena de texto en la pantalla en la posición actual del cursor. Se puede llamar a esta función con los valores `-1` para `col` y `row`.
 
-kprint_at
----------
+El proceso de impresión se realiza de la siguiente manera:
+1. Se establecen tres variables para representar la columna, la fila y el desplazamiento del cursor.
+2. Se itera a través de un puntero `char*` y se llama a la función `print_char()` con las coordenadas actuales.
+3. Cabe destacar que la función `print_char` devuelve el desplazamiento de la siguiente posición del cursor, el cual es reutilizado en la siguiente iteración del bucle.
 
-`kprint_at` may be called with a `-1` value for `col` and `row`, which indicates that
-we will print the string at the current cursor position.
+La función `kprint` es básicamente un contenedor para la función `kprint_at`.
 
-It first sets three variables for the col/row and the offset. Then it iterates through
-the `char*` and calls `print_char()` with the current coordinates.
+### Función `print_char`
 
-Note that `print_char` itself returns the offset of the next cursor position, and we reuse
-it for the next loop.
+Al igual que `kprint_at`, la función `print_char` permite que las columnas y filas sean `-1`. En caso de que sean `-1`, la función recupera la posición actual del cursor del hardware utilizando las rutinas definidas en el archivo `ports.c`.
 
-`kprint` is basically a wrapper for `kprint_at`
+La función `print_char` también gestiona los saltos de línea. En ese caso, se coloca el desplazamiento del cursor en la columna 0 de la siguiente fila.
 
+Es importante tener en cuenta que las celdas VGA están compuestas por dos bytes: uno para el carácter en sí y otro para el atributo.
 
+## Archivo `núcleo.c`
 
-print_char
-----------
-
-Like `kprint_at`, `print_char` allows cols/rows to be `-1`. In that case it retrieves
-the cursor position from the hardware, using the `ports.c` routines.
-
-`print_char` also handles newlines. In that case, we will position the cursor offset
-to column 0 of the next row. 
-
-Remember that the VGA cells take two bytes, one for the character itself and another one
-for the attribute.
-
-
-kernel.c
---------
-
-Our new kernel is finally able to print strings.
-
-It tests correct character positioning, spanning through multiple lines, line breaks,
-and finally it tries to write outside of the screen bounds. What happens then?
-
-In the next lesson we will learn how to scroll the screen.
+En el archivo `núcleo.c`, se implementa la capacidad del kernel para imprimir cadenas de texto. Se realiza una serie de pruebas para verificar el correcto posicionamiento de los caracteres, abarcando múltiples líneas, saltos de línea y, finalmente, intentando escribir fuera de los límites de la pantalla. Se recomienda analizar el comportamiento y los resultados obtenidos en estas pruebas.
