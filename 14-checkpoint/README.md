@@ -1,22 +1,10 @@
-*Concepts you may want to Google beforehand: monolithic kernel, microkernel, debugger, gdb*
+**Objetivo: Pausar y organizar un poco nuestro código. Luego aprenda a depurar el kernel con gdb**
 
-**Goal: Pause and organize our code a little bit. Then learn how to debug the kernel with gdb**
+Una vez construido el Kernel y antes de avanzar vamos a organizar el código en carpetas, crear un Makefile escalable para código futuro y pensar en una estrategia.
 
-Maybe you didn't realize it, but you already have your own kernel
-running!
+La mayoría de los archivos creados tienen enlaces simbólicos de lecciones anteriores, por lo que si tenemos que cambiarlos en algún momento, será una mejor idea eliminar el enlace simbólico y crear un nuevo archivo.
 
-However, it does very little, just print an 'X'. Now is the time to stop for
-a moment and organize the code into folders, create a scalable Makefile for future code,
-and think on a strategy.
-
-Take a look at the new folder structure. Most of the files have been symlinked
-from previous lessons, so if we have to change them at some point, it will be
-a better idea to remove the symlink and create a new file.
-
-Furthermore, since from now on we will use mostly C to code, we'll take advantage of qemu's
-ability to open a connection to gdb. First, let's install a cross-compiled `gdb` since
-OSX uses `lldb` which is not compatible with the ELF file format (neither is the `gdb` available
-on Homebrew's repos)
+Además, usaremos principalmente C para codificar, aprovecharemos la capacidad de qemu para abrir una conexión con gdb. Primero, instalamos un 'gdb' de compilación cruzada ya que OSX usa 'lldb' que no es compatible con el formato de archivo ELF.
 
 ```sh
 cd /tmp/src
@@ -31,28 +19,17 @@ make
 make install
 ```
 
-Check out the Makefile target `make debug`. This target uses builds `kernel.elf`, which
-is an object file (not binary) with all the symbols we generated on the kernel, thanks to
-the `-g` flag on gcc. Please examine it with `xxd` and you'll see some strings. Actually,
-the correct way to examine the strings in an object file is by `strings kernel.elf`
+El objetivo de Makefile `make debug`. Este objetivo usa compilaciones `kernel.elf`, que es un archivo de objeto (no binario) con todos los símbolos que generamos en el kernel, gracias al indicador `-g` en gcc. Por favor, examínelo con `xxd` y verá algunas cadenas. En realidad, la forma correcta de examinar las cadenas en un archivo de objeto es `strings kernel.elf`
 
-We can take advantage of this cool qemu feature. Type `make debug` and, on the gdb shell:
+Podemos aprovechar esta característica de qemu. Escribiendo `make debug` y, en el shell de gdb:
 
-- Set up a breakpoint in `kernel.c:main()`: `b main`
-- Run the OS: `continue`
-- Run two steps into the code: `next` then `next`. You will see that we are just about to set
-  the 'X' on the screen, but it isn't there yet (check out the qemu screen)
-- Let's see what's in the video memory: `print *video_memory`. There is the 'L' from "Landed in
-  32-bit Protected Mode"
-- Hmmm, let's make sure that `video_memory` points to the correct address: `print video_memory`
-- `next` to put there our 'X'
-- Let's make sure: `print *video_memory` and look at the qemu screen. It's definitely there.
-
-Now is a good time to read some tutorial on `gdb` and learn super useful things like `info registers`
-which will save us a lot of time in the future!
+- Configurar un punto de interrupción en `kernel.c:main()`: `b main`
+- Ejecutar el sistema operativo: `continuar`
+- Ejecutar dos pasos en el código: `siguiente` y luego `siguiente`.
+- En la memoria de video: `print *video_memory`. Está la 'L' de "Landed in
+   Modo protegido de 32 bits"
+- `video_memory` apunta a la dirección correcta: `print video_memory`
+- `siguiente` 
 
 
-You may notice that, since this is a tutorial, we haven't yet discussed which kind
-of kernel we will write. It will probably be a monolithic one since they are easier
-to design and implement, and after all this is our first OS. Maybe in the future
-we'll add a lesson "15-b" with a microkernel design. Who knows.
+*El Kernel será monolítico, ya que son más fáciles de diseñar e implementar.
